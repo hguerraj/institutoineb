@@ -1,0 +1,9 @@
+{% if constant('ENABLE_STYLE_SWITCHING') == true %}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="style-switcher-wrapper" aria-labelledby="style-switcher-label">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="style-switcher-label">{{ constant('CUSTOMIZE_THEME_AND_NAVBARS') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body"></div>
+</div>
+{% endif %}

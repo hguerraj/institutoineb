@@ -1,0 +1,78 @@
+{
+    "smallint": {
+        "type": "smallint",
+        "range": 5
+    },
+    "integer": {
+        "type": "int",
+        "range": 10
+    },
+    "bigint": {
+        "type": "bigint",
+        "range": 19
+    },
+    "decimal": {
+        "type": "decimal"
+    },
+    "numeric": {
+        "type": "decimal"
+    },
+    "real": {
+        "type": "real"
+    },
+    "smallserial": {
+        "type": "smallint",
+        "range": 5,
+        "unsigned": true
+    },
+    "serial": {
+        "type": "int",
+        "range": 10,
+        "unsigned": true
+    },
+    "bigserial": {
+        "type": "bigint",
+        "range": 19,
+        "unsigned": true
+    },
+    "money": {
+        "type": "bigint",
+        "range": 19
+    },
+    "character varying": {
+        "type": "varchar"
+    },
+    "varchar": {
+        "type": "varchar"
+    },
+    "character": {
+        "type": "varchar"
+    },
+    "char": {
+        "type": "char"
+    },
+    "text": {
+        "type": "text"
+    },
+    "timestamp without time zone": {
+        "type": "timestamp"
+    },
+    "timestamp with time zone": {
+        "type": "timestamp"
+    },
+    "time without time zone": {
+        "type": "time"
+    },
+    "time with time zone": {
+        "type": "time"
+    },
+    "boolean": {
+        "type": "tinyint"
+    },
+    "USER-DEFINED": {
+        "type": "enum"
+    },
+    "json": {
+        "type": "json"
+    }
+}

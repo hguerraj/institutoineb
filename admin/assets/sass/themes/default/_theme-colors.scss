@@ -1,0 +1,87 @@
+/*=============================================
+=            set your colors here             =
+=============================================*/
+
+/* $blue: #27619f;
+// $indigo: #3f51b5;
+// $purple: #9c27b0;
+// $pink: #e91e63;
+$red: #f44336;
+// $orange: #ff9800;
+$yellow: #ffc107;
+$green: #4caf50;
+// $teal: #009688;
+$cyan: #00bcd4;
+$gray: #A1BBD6;
+$gray-dark: #232B33; */
+
+$blue: #88B9EB;
+// $indigo: #3f51b5;
+$purple: #a18fcf;
+// $pink: #e91e63;
+$red: #f2777a;
+// $orange: #ff9800;
+$yellow: #ffcc66;
+$green: #77c0b5;
+// $teal: #009688;
+// $cyan: #00bcd4;
+$gray: #7A7980;
+$gray-dark: #2E2E2E;
+
+// remap $grays
+
+$color-variants: (
+    100: -10%,
+    200: -25%,
+    300: -50%,
+    400: -75%,
+    500: 100%,
+    600: 75%,
+    700: 50%,
+    800: 25%,
+    900: 15%,
+);
+
+$grays: ();
+
+@each $variant-name, $percent in $color-variants {
+    $mix-color: if($percent < 0%, white, black);
+    $grays: map-merge($grays, ("gray-" + $variant-name: mix($gray, $mix-color, abs($percent))));
+}
+$gray-100: map-get($grays, 'gray-100');
+$gray-200: map-get($grays, 'gray-200');
+$gray-300: map-get($grays, 'gray-300');
+$gray-400: map-get($grays, 'gray-400');
+$gray-500: map-get($grays, 'gray-500');
+$gray-600: map-get($grays, 'gray-600');
+$gray-700: map-get($grays, 'gray-700');
+$gray-800: map-get($grays, 'gray-800');
+$gray-900: map-get($grays, 'gray-900');
+
+/*=============================================
+=         set your theme colors here          =
+=============================================*/
+
+$primary:       $blue;
+$secondary:     $gray-500;
+$success:       $green;
+$info:          $purple;
+$warning:       $yellow;
+$danger:        $red;
+$light:         darken($gray-100, 2.5%);
+$dark:          $gray-dark;
+
+// remap theme-colors
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+);
+
+$component-active-bg: $primary;
+$pagination-active-bg: $primary;

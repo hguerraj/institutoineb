@@ -1,0 +1,286 @@
+<div class="px-4">
+    {# Partial block debug - rendered alone on the research results #}
+    {% block object_debug %}
+    <div id="debug-content">{{ object.debug_content|raw }}</div>
+    {% endblock object_debug %}
+    {# END Partial block - rendered alone on the research results #}
+    <div id="toolbar" class="d-lg-flex flex-wrap justify-content-between">
+        {% if object.records_count > 0 %}
+
+        <div class="d-flex ms-auto order-lg-2">
+            {{ object.select_number_per_page|raw }}
+        </div>
+
+        <hr class="w-100 d-lg-none">
+
+        {% endif %}
+        <div class="d-flex order-lg-0 mb-3">
+            {% if object.can_create == true %}
+            <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/create" class="btn btn-sm me-1 btn-primary d-flex align-items-center"><i class="{{ constant('ICON_PLUS') }} prepend"></i>{{ constant('ADD_NEW') }}</a>
+            {% endif %}
+                {% if object.records_count > 0 %}
+                {{ object.export_data_button|raw }}
+                {% endif %}
+        </div>
+
+        <div class="order-lg-1 mx-lg-auto">
+            <form name="rp-search-form" id="rp-search-form" class="form-inline justify-content-center">
+                <div class="input-group input-group-sm">
+                    <button class="input-group-text btn {{ constant('DEFAULT_BUTTONS_CLASS') }} dropdown-toggle ps-4 pe-3" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                    <ul id="rp-search-field" class="dropdown-menu">
+                        {% for field_name, field_display_name in object.fields %}
+                        {% set active = '' %}
+                        {% if field_name == attribute(session.rp_search_field, object.table) %}
+                        {% set active = ' active' %}
+                        {% elseif field_name == '' %}
+                        {% set active = ' active' %}
+                        {% endif %}
+                        <li><a class="dropdown-item{{ active }}" href="#" rel="noindex" data-value="{{ field_name }}">{{ field_display_name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% set search_value = '' %}
+                    {% if attribute(session.rp_search_string, object.table) is defined %}
+                    {% set search_value = attribute(session.rp_search_string, object.table) %}
+                    {% endif %}
+                    <input id="rp-search" name="rp-search" type="text" value="{{ search_value }}" placeholder="{{ constant('SEARCH') }}" class="form-control form-control-sm flex-grow-1">
+                    <button id="rp-search-submit" class="input-group-text btn {{ constant('DEFAULT_BUTTONS_CLASS') }}" data-ladda-button="true" data-style="zoom-in" type="submit"><span class="ladda-label"><i class="{{ constant('ICON_SEARCH') }}"></i></span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Partial block list - rendered alone on the research results #}
+    {% block object_list %}
+
+    {%
+        set filtered_class = {
+            id: 'id' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            profile_name: 'profile_name' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_alumnos: 'r_alumnos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_alumnos: 'u_alumnos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_alumnos: 'cd_alumnos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_alumnos: 'cq_alumnos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_carreras: 'r_carreras' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_carreras: 'u_carreras' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_carreras: 'cd_carreras' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_carreras: 'cq_carreras' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_cursos: 'r_cursos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_cursos: 'u_cursos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_cursos: 'cd_cursos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_cursos: 'cq_cursos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_grados: 'r_grados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_grados: 'u_grados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_grados: 'cd_grados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_grados: 'cq_grados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_grados_secciones: 'r_grados_secciones' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_grados_secciones: 'u_grados_secciones' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_grados_secciones: 'cd_grados_secciones' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_grados_secciones: 'cq_grados_secciones' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_inscripciones: 'r_inscripciones' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_inscripciones: 'u_inscripciones' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_inscripciones: 'cd_inscripciones' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_inscripciones: 'cq_inscripciones' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_notas: 'r_notas' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_notas: 'u_notas' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_notas: 'cd_notas' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_notas: 'cq_notas' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_padres_encargados: 'r_padres_encargados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_padres_encargados: 'u_padres_encargados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_padres_encargados: 'cd_padres_encargados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_padres_encargados: 'cq_padres_encargados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_pagos: 'r_pagos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_pagos: 'u_pagos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_pagos: 'cd_pagos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_pagos: 'cq_pagos' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_profesores: 'r_profesores' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_profesores: 'u_profesores' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_profesores: 'cd_profesores' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_profesores: 'cq_profesores' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_unidades: 'r_unidades' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_unidades: 'u_unidades' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_unidades: 'cd_unidades' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_unidades: 'cq_unidades' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_phpcg_users: 'r_phpcg_users' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_phpcg_users: 'u_phpcg_users' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_phpcg_users: 'cd_phpcg_users' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_phpcg_users: 'cq_phpcg_users' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_phpcg_users_profiles: 'r_phpcg_users_profiles' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_phpcg_users_profiles: 'u_phpcg_users_profiles' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_phpcg_users_profiles: 'cd_phpcg_users_profiles' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_phpcg_users_profiles: 'cq_phpcg_users_profiles' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':''
+        }
+    %}
+
+    <div id="{{ object.item }}-list">
+
+        {% if object.records_count > 0 %}
+        <div class="table-data-wrapper">
+            <table class="table table-data table-togglable"  data-toggle-column="first" data-toggle-selector=".footable-toggle">
+                <thead>
+                    <tr class="{{ constant('DEFAULT_TABLE_HEADING_CLASS') }}">
+                        <th>&nbsp;</th>
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'left' %}
+                        <th>{{ constant('ACTION_CONST') }}</th>
+                        {% endif %}
+                        <th>{{ object.fields.id }}</th>
+                        <th>{{ object.fields.profile_name }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_alumnos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_alumnos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_alumnos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_alumnos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_carreras }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_carreras }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_carreras }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_carreras }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_cursos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_cursos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_cursos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_cursos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_grados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_grados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_grados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_grados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_grados_secciones }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_grados_secciones }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_grados_secciones }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_grados_secciones }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_inscripciones }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_inscripciones }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_inscripciones }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_inscripciones }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_notas }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_notas }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_notas }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_notas }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_padres_encargados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_padres_encargados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_padres_encargados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_padres_encargados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_pagos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_pagos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_pagos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_pagos }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_profesores }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_profesores }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_profesores }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_profesores }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_unidades }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_unidades }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_unidades }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_unidades }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_phpcg_users }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_phpcg_users }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_phpcg_users }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_phpcg_users }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_phpcg_users_profiles }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_phpcg_users_profiles }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_phpcg_users_profiles }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_phpcg_users_profiles }}</th>
+                            {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'right' %}
+                        <th>{{ constant('ACTION_CONST') }}</th>
+                            {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(0, object.records_count - 1) %}
+                    <tr>
+                        <td></td>
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'left' %}
+                        <td class="has-btn-group no-ellipsis">
+                            <div class="btn-group">
+                                {% if object.update_record_authorized[object.pk_concat_values[loop.index0]] == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/edit/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-title="{{ constant('EDIT') }}"><span class="{{ constant('ICON_EDIT') }} icon-md"></span></a>
+                                {% endif %}
+                                {% if object.can_create == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/delete/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-title="{{ constant('DELETE_CONST') }}"><span class="{{ constant('ICON_DELETE') }} icon-md"></span></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                        <td{{ filtered_class.id|raw }}>{{ object.id[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.profile_name|raw }}>{{ object.profile_name[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_alumnos|raw }}>{{ object.r_alumnos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_alumnos|raw }}>{{ object.u_alumnos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_alumnos|raw }}>{{ object.cd_alumnos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_alumnos|raw }}>{{ object.cq_alumnos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_carreras|raw }}>{{ object.r_carreras[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_carreras|raw }}>{{ object.u_carreras[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_carreras|raw }}>{{ object.cd_carreras[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_carreras|raw }}>{{ object.cq_carreras[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_cursos|raw }}>{{ object.r_cursos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_cursos|raw }}>{{ object.u_cursos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_cursos|raw }}>{{ object.cd_cursos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_cursos|raw }}>{{ object.cq_cursos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_grados|raw }}>{{ object.r_grados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_grados|raw }}>{{ object.u_grados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_grados|raw }}>{{ object.cd_grados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_grados|raw }}>{{ object.cq_grados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_grados_secciones|raw }}>{{ object.r_grados_secciones[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_grados_secciones|raw }}>{{ object.u_grados_secciones[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_grados_secciones|raw }}>{{ object.cd_grados_secciones[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_grados_secciones|raw }}>{{ object.cq_grados_secciones[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_inscripciones|raw }}>{{ object.r_inscripciones[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_inscripciones|raw }}>{{ object.u_inscripciones[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_inscripciones|raw }}>{{ object.cd_inscripciones[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_inscripciones|raw }}>{{ object.cq_inscripciones[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_notas|raw }}>{{ object.r_notas[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_notas|raw }}>{{ object.u_notas[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_notas|raw }}>{{ object.cd_notas[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_notas|raw }}>{{ object.cq_notas[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_padres_encargados|raw }}>{{ object.r_padres_encargados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_padres_encargados|raw }}>{{ object.u_padres_encargados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_padres_encargados|raw }}>{{ object.cd_padres_encargados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_padres_encargados|raw }}>{{ object.cq_padres_encargados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_pagos|raw }}>{{ object.r_pagos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_pagos|raw }}>{{ object.u_pagos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_pagos|raw }}>{{ object.cd_pagos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_pagos|raw }}>{{ object.cq_pagos[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_profesores|raw }}>{{ object.r_profesores[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_profesores|raw }}>{{ object.u_profesores[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_profesores|raw }}>{{ object.cd_profesores[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_profesores|raw }}>{{ object.cq_profesores[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_unidades|raw }}>{{ object.r_unidades[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_unidades|raw }}>{{ object.u_unidades[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_unidades|raw }}>{{ object.cd_unidades[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_unidades|raw }}>{{ object.cq_unidades[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_phpcg_users|raw }}>{{ object.r_phpcg_users[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_phpcg_users|raw }}>{{ object.u_phpcg_users[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_phpcg_users|raw }}>{{ object.cd_phpcg_users[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_phpcg_users|raw }}>{{ object.cq_phpcg_users[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_phpcg_users_profiles|raw }}>{{ object.r_phpcg_users_profiles[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_phpcg_users_profiles|raw }}>{{ object.u_phpcg_users_profiles[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_phpcg_users_profiles|raw }}>{{ object.cd_phpcg_users_profiles[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_phpcg_users_profiles|raw }}>{{ object.cq_phpcg_users_profiles[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'right' %}
+                        <td class="has-btn-group no-ellipsis">
+                            <div class="btn-group">
+                                {% if object.update_record_authorized[object.pk_concat_values[loop.index0]] == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/edit/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-title="{{ constant('EDIT') }}" data-delay="500"><span class="{{ constant('ICON_EDIT') }} icon-md"></span></a>
+                                {% endif %}
+                                {% if object.can_create == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/delete/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-title="{{ constant('DELETE_CONST') }}" data-delay="500"><span class="{{ constant('ICON_DELETE') }} icon-md"></span></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div> <!-- END table-responsive -->
+
+        {% else %}
+        <p class="text-semibold">
+            {{ alert(constant('NO_RECORD_FOUND'), 'alert-info has-icon')|raw }}
+        </p>
+        {% endif %}
+
+        <div id="pagination-wrapper" class="d-flex justify-content-between p-4">
+            {{ object.pagination_html|raw }}
+        </div>
+    </div> <!-- END {{ object.item }}-list -->
+
+    {% endblock object_list %}
+    {# END Partial block - rendered alone on the research results #}
+
+</div> <!-- END card -->

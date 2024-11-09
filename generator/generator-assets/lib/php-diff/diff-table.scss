@@ -1,0 +1,248 @@
+/**
+ * You can compile this by https://www.sassmeister.com with
+ *
+ * - dart-sass v1.18.0
+ */
+
+$diff-bg-color: #fff !default;
+$diff-text-color: invert($diff-bg-color) !default;
+
+$diff-bg-color-ins-base: #8e8 !default;
+$diff-bg-color-del-base: #e88 !default;
+$diff-bg-color-rep-base: #fbdb65 !default;
+
+$diff-op-highlight-ratio: 90% !default;
+$diff-op-normal-ratio: 25% !default;
+
+// emphasized colors for detailed inline difference
+$diff-bg-color-ins-highlight: mix($diff-bg-color-ins-base, $diff-bg-color, $diff-op-highlight-ratio) !default;
+$diff-bg-color-del-highlight: mix($diff-bg-color-del-base, $diff-bg-color, $diff-op-highlight-ratio) !default;
+
+// colors for operation rows
+$diff-bg-color-ins: mix($diff-bg-color-ins-base, $diff-bg-color, $diff-op-normal-ratio) !default;
+$diff-bg-color-del: mix($diff-bg-color-del-base, $diff-bg-color, $diff-op-normal-ratio) !default;
+$diff-bg-color-rep: mix($diff-bg-color-rep-base, $diff-bg-color, $diff-op-normal-ratio) !default;
+
+$diff-table-head-color: mix($diff-bg-color, $diff-text-color, 65%) !default;
+$diff-table-sidebar-color: mix($diff-bg-color, $diff-text-color, 80%) !default;
+$diff-border-color: lighten($diff-text-color, 90%) !default;
+
+// color for the nonexistent block
+// for example, there are a deleted line that has no corresponding one
+$diff-bg-color-none-block: mix($diff-bg-color, $diff-table-sidebar-color, 80%) !default;
+$diff-bg-color-none-block-alternative: mix($diff-bg-color, $diff-table-sidebar-color, 55%) !default;
+
+.diff-wrapper.diff {
+  background: repeating-linear-gradient(
+    -45deg,
+    $diff-bg-color-none-block,
+    $diff-bg-color-none-block 0.5em,
+    $diff-bg-color-none-block-alternative 0.5em,
+    $diff-bg-color-none-block-alternative 1em
+  );
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 1px solid $diff-border-color;
+  color: $diff-text-color;
+  empty-cells: show;
+  font-size: 11px;
+  width: 100%;
+  word-break: break-all;
+
+  th {
+    font-weight: normal;
+  }
+
+  td {
+    vertical-align: baseline;
+    font-family: Consolas, monospace;
+  }
+
+  td,
+  th {
+    border-collapse: collapse;
+    border: none;
+    padding: 1px 4px;
+    background: $diff-bg-color;
+
+    // make empty cell has height
+    &:empty:after {
+      content: " ";
+      visibility: hidden;
+    }
+
+    a {
+      color: #000;
+      cursor: inherit;
+      pointer-events: none;
+    }
+  }
+
+  thead th {
+    font-size: 1.5em;
+    text-align: left;
+    background: #363B3F;
+    color: #fff;
+    padding: 4px 3em 7px;
+  }
+
+  tbody {
+    &.skipped {
+      border-top: 1px solid $diff-border-color;
+
+      td,
+      th {
+        display: none;
+      }
+    }
+
+    th {
+      border-right: 1px solid $diff-border-color;
+      text-align: right;
+      background: #f2f2f2;
+      width: 3em;
+      vertical-align: top;
+      font-size: 11px;
+      font-weight: normal;
+
+      &.sign {
+        background: $diff-bg-color;
+        border-right: none;
+        padding: 1px 0;
+        text-align: center;
+        width: 1em;
+
+        &.del {
+          background: $diff-bg-color-del;
+        }
+
+        &.ins {
+          background: $diff-bg-color-ins;
+        }
+      }
+    }
+  }
+
+  &.diff-html {
+    white-space: pre-wrap;
+
+    &.diff-combined {
+      .change.change-rep {
+        .rep {
+          // fixes https://github.com/jfcherng/php-diff/issues/34#issuecomment-671404456
+          white-space: normal;
+        }
+      }
+    }
+
+    .change {
+      &.change-eq {
+        .old,
+        .new {
+          background: $diff-bg-color;
+        }
+      }
+
+      .old {
+        background: $diff-bg-color-del;
+      }
+
+      .new {
+        background: $diff-bg-color-ins;
+      }
+
+      .rep {
+        background: $diff-bg-color-rep;
+      }
+
+      .old,
+      .new,
+      .rep {
+        &.none {
+          background: transparent;
+        }
+      }
+
+      ins,
+      del {
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      ins {
+        background: $diff-bg-color-ins-highlight;
+      }
+
+      del {
+        background: $diff-bg-color-del-highlight;
+      }
+
+      &.change-rep td,
+      &.change-ins td,
+      &.change-del td {
+        cursor: pointer;
+      }
+      &.change-rep td.hover,
+      &.change-ins td.hover,
+      &.change-del td.hover,
+      &.change-rep td.dontUse.hover,
+      &.change-ins td.dontUse.hover,
+      &.change-del td.dontUse.hover {
+        background: #000;
+        color: #fff;
+      }
+      &.change-rep td.hover del,
+      &.change-ins td.hover del,
+      &.change-del td.hover del,
+      &.change-rep td.dontUse.hover del,
+      &.change-ins td.dontUse.hover del,
+      &.change-del td.dontUse.hover del,
+      &.change-rep td.hover ins,
+      &.change-ins td.hover ins,
+      &.change-del td.hover ins,
+      &.change-rep td.dontUse.hover ins,
+      &.change-ins td.dontUse.hover ins,
+      &.change-del td.dontUse.hover ins {
+        background: #000;
+        color: #fff;
+      }
+      &.change-rep td.use.hover,
+      &.change-ins td.use.hover,
+      &.change-del td.use.hover {
+        cursor: default;
+        color: #000;
+      }
+      &.change-rep td.use.hover del,
+      &.change-ins td.use.hover del,
+      &.change-del td.use.hover del,
+      &.change-rep td.use.hover ins,
+      &.change-ins td.use.hover ins,
+      &.change-del td.use.hover ins {
+        background: #6eef81;
+        color: #000;
+      }
+      &.change-rep td.use,
+      &.change-ins td.use,
+      &.change-del td.use {
+        background: #6eef81;
+      }
+      &.change-rep td.dontUse,
+      &.change-ins td.dontUse,
+      &.change-del td.dontUse {
+        background: #f7f7f7;
+        color: #dddddd;
+      }
+      &.change-rep td.use del,
+      &.change-rep td.use.hover del,
+      &.change-rep td.use ins,
+      &.change-rep td.use.hover ins {
+        background: #0cd123;
+      }
+      &.change-rep td.dontUse del,
+      &.change-rep td.dontUse ins {
+        background: #dddddd;
+        color: #bbbbbb;
+      }
+    }
+  }
+}

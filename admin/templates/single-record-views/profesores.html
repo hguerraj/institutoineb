@@ -1,0 +1,70 @@
+<div class="modal-header text-bg-info">
+    <p class="modal-title h1 mb-0 fs-5">{{ object.item_label }}</p>
+    <button type="button" class="btn-close modal-close" aria-label="{{ constant('CLOSE') }}"></button>
+</div>
+<div class="modal-body">
+    <div id="single-record-debug-content">{{ object.debug_content|raw }}</div>
+    {# Partial block print_view - rendered alone on the print view #}
+    {% block print_view %}
+    {% if object.records_count > 0 %}
+    <table id="single-record-export-table" class="table table-sm table-borderless">
+        <thead>
+            <tr>
+                <th></th>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(0, object.records_count - 1) %}
+                        <tr>
+                <th>ID</th>
+                <td>{{ object.ID[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>Nombre</th>
+                <td>{{ object.Nombre[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>Fecha_Nacimiento</th>
+                <td>{{ toDate(object.Fecha_Nacimiento[ loop.index0 ], 'dd MMMM yyyy')|raw }}</td>
+            </tr>
+                        <tr>
+                <th>direccion</th>
+                <td>{{ object.direccion[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>telefono</th>
+                <td>{{ object.telefono[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>Email</th>
+                <td>{{ object.Email[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>Asignaturas</th>
+                <td>{{ object.Asignaturas[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>Horario</th>
+                <td>{{ object.Horario[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>Grado_ID</th>
+                <td>{{ object.Grado_ID[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>Usuario_ID</th>
+                <td>{{ object.Usuario_ID[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% endblock print_view %}
+    {# END Partial block print_view - rendered alone on the print view #}
+</div>
+<div class="modal-footer">
+    <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/print-view/{{ object.pk_url_params[0] }}" class="btn btn-primary" target="_blank" rel="nofollow">{{ constant('EXPORT') }} / {{ constant('PRINT') }}</a>
+    <button type="button" class="btn btn-light modal-close">{{ constant('CLOSE') }} <i class="{{ constant('ICON_CANCEL') }} append"></i></button>
+</div>

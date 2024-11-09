@@ -1,0 +1,42 @@
+<div class="modal-header text-bg-info">
+    <p class="modal-title h1 mb-0 fs-5">{{ object.item_label }}</p>
+    <button type="button" class="btn-close modal-close" aria-label="{{ constant('CLOSE') }}"></button>
+</div>
+<div class="modal-body">
+    <div id="single-record-debug-content">{{ object.debug_content|raw }}</div>
+    {# Partial block print_view - rendered alone on the print view #}
+    {% block print_view %}
+    {% if object.records_count > 0 %}
+    <table id="single-record-export-table" class="table table-sm table-borderless">
+        <thead>
+            <tr>
+                <th></th>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(0, object.records_count - 1) %}
+                        <tr>
+                <th>actor_id</th>
+                <td>{{ object.actor_id[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>film_id</th>
+                <td>{{ object.film_id[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>last_update</th>
+                <td>{{ toDate(object.last_update[ loop.index0 ], 'dd MMMM yyyy H:m a')|raw }}</td>
+            </tr>
+                        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% endblock print_view %}
+    {# END Partial block print_view - rendered alone on the print view #}
+</div>
+<div class="modal-footer">
+    <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/print-view/{{ object.pk_url_params[0] }}" class="btn btn-primary" target="_blank" rel="nofollow">{{ constant('EXPORT') }} / {{ constant('PRINT') }}</a>
+    <button type="button" class="btn btn-light modal-close">{{ constant('CLOSE') }} <i class="{{ constant('ICON_CANCEL') }} append"></i></button>
+</div>

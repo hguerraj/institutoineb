@@ -1,0 +1,84 @@
+<!-- Main sidebar -->
+<nav id="{{ sidebar.id }}" role="navigation" aria-label="Secondary navigation" class="sidebar flex-column flex-nowrap justify-content-start {{ sidebar.class }}">
+    <button type="button" class="sidebar-toggler btn-close" aria-label="Close"></button>
+    <a href="{{ constant('ADMIN_URL') }}home" class="my-3 d-block w-100 text-center" title="{{ constant('SITENAME') }}"><img src="assets/images/logo-height-100-white.png"></a>
+    {# loop categories #}
+    {% for categorie in sidebar.categories %}
+    {% if categorie.collapsed == true or categorie.id == 'sidebarFilters' %}
+    <div id="{{ categorie.id }}" class="sidebar-category">
+    {% else %}
+    <div id="{{ categorie.id }}" class="sidebar-category active">
+    {% endif %}
+        {% if categorie.title|length > 0 %}
+        <div class="category-title nav-link">
+            {{ categorie.title|raw }}
+        </div>
+        {% endif %}
+        {# loop navs #}
+        {% for nav in categorie.navs %}
+            {% if categorie.collapsible == true %}
+                {% if categorie.collapsed == true %}
+        <div class="category-content collapse" id="{{ nav.id }}">
+                {% else %}
+        <div class="category-content collapse show" id="{{ nav.id }}">
+                {% endif %}
+            {% else %}
+        <div class="category-content" id="{{ nav.id }}">
+            {% endif %}
+
+            <ul class="{{ nav.class }}">
+                {# loop nav items #}
+                {% for item in nav.items %}
+                <li{{item.item_attr|raw}}>
+                    {% if item.url|length > 0 %}
+                    <a href="{{ item.url }}" title="{{ item.tooltip|raw }}" {{ item.link_attr|raw }}>
+                    {% endif %}
+                    {% if item.icon|length > 0 %}
+                        <i class="{{ item.icon|raw }} text-gray fa-lg me-3"></i>
+                    {% endif %}
+                        {{ item.text|raw }}
+                    {% if item.url|length > 0 %}
+                    </a>
+                    {% endif %}
+                    {# if dropdown #}
+                        {% if item.dropdown|length > 0 %}
+
+                    <ul id="{{ item.dropdown_id }}" class="{{ item.dropdown_class }}">
+                        {# loop dropdown items #}
+                        {% for dropdownitem in item.dropdown.items %}
+                        <li{{dropdownitem.item_attr|raw}}>
+                            {% if dropdownitem.url|length > 0 %}
+                            <a href="{{ dropdownitem.url }}" title="{{ dropdownitem.tooltip|raw }}" {{ dropdownitem.link_attr|raw }}>
+                            {% endif %}
+                            {% if dropdownitem.icon|length > 0 %}
+                                <i class="{{ dropdownitem.icon|raw }}"></i>
+                            {% endif %}
+                                {{ dropdownitem.text|raw }}
+                            {% if dropdownitem.url|length > 0 %}
+                            </a>
+                            {% endif %}
+                        {# end loop dropdown items #}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <!-- /Sub Nav -->
+                    {# end if dropdown #}
+                    {% endif %}
+                {# end loop nav items #}
+                </li>
+            {% endfor %}
+            </ul>
+        <!-- /Nav -->
+        </div>
+        <!-- /Category Content -->
+        {# end loop navs #}
+        {% endfor %}
+    </div>
+    <!-- /Sidebar Category -->
+    {# end loop categories #}
+    {% endfor %}
+    {% if sidebar.categories|length < 1 %}
+    <p class="p-2 text-center text-danger">{{ constant('SIDEBAR_EMPTY_ALERT')}}</p>
+    {% endif %}
+    <!-- /main sidebar -->
+</nav>

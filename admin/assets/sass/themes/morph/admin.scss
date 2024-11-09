@@ -1,0 +1,26 @@
+/* Admin CORE custom variables */
+@import "../../admin-core/variables-custom";
+
+/* Bootstrap functions */
+@import "../../../../../../node_modules/bootstrap/scss/functions";
+
+/* -------------------------- Bootswatch here -------------------------- */
+
+@import "../../../../../../node_modules/bootswatch/dist/morph/variables";
+
+/* ----------------------------------- End ---------------------------------- */
+
+/* Admin Utilities */
+@import "../../admin-core/utilities";
+
+/* Bootstrap Mixins */
+@import "../../../../../../node_modules/bootstrap/scss/mixins";
+
+/* Admin Mixins */
+@import "../../admin-core/mixins";
+
+/* Admin THEME main SCSS */
+@import "admin-theme";
+
+/* Admin CORE main SCSS */
+@import "../../admin-core/admin-core";

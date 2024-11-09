@@ -1,0 +1,139 @@
+<div class="px-4">
+    {# Partial block debug - rendered alone on the research results #}
+    {% block object_debug %}
+    <div id="debug-content">{{ object.debug_content|raw }}</div>
+    {% endblock object_debug %}
+    {# END Partial block - rendered alone on the research results #}
+    <div id="toolbar" class="d-lg-flex flex-wrap justify-content-between">
+        {% if object.records_count > 0 %}
+
+        <div class="d-flex ms-auto order-lg-2">
+            {{ object.select_number_per_page|raw }}
+        </div>
+
+        <hr class="w-100 d-lg-none">
+
+        {% endif %}
+        <div class="d-flex order-lg-0 mb-3">
+            {% if object.can_create == true %}
+            <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/create" class="btn btn-sm me-1 btn-primary d-flex align-items-center"><i class="{{ constant('ICON_PLUS') }} prepend"></i>{{ constant('ADD_NEW') }}</a>
+            {% endif %}
+                {% if object.records_count > 0 %}
+                {{ object.export_data_button|raw }}
+                {% endif %}
+        </div>
+
+        <div class="order-lg-1 mx-lg-auto">
+            <form name="rp-search-form" id="rp-search-form" class="form-inline justify-content-center">
+                <div class="input-group input-group-sm">
+                    <button class="input-group-text btn {{ constant('DEFAULT_BUTTONS_CLASS') }} dropdown-toggle ps-4 pe-3" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                    <ul id="rp-search-field" class="dropdown-menu">
+                        {% for field_name, field_display_name in object.fields %}
+                        {% set active = '' %}
+                        {% if field_name == attribute(session.rp_search_field, object.table) %}
+                        {% set active = ' active' %}
+                        {% elseif field_name == 'ID' %}
+                        {% set active = ' active' %}
+                        {% endif %}
+                        <li><a class="dropdown-item{{ active }}" href="#" rel="noindex" data-value="{{ field_name }}">{{ field_display_name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% set search_value = '' %}
+                    {% if attribute(session.rp_search_string, object.table) is defined %}
+                    {% set search_value = attribute(session.rp_search_string, object.table) %}
+                    {% endif %}
+                    <input id="rp-search" name="rp-search" type="text" value="{{ search_value }}" placeholder="{{ constant('SEARCH') }}" class="form-control form-control-sm flex-grow-1">
+                    <button id="rp-search-submit" class="input-group-text btn {{ constant('DEFAULT_BUTTONS_CLASS') }}" data-ladda-button="true" data-style="zoom-in" type="submit"><span class="ladda-label"><i class="{{ constant('ICON_SEARCH') }}"></i></span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Partial block list - rendered alone on the research results #}
+    {% block object_list %}
+
+    {%
+        set filtered_class = {
+            ID: 'ID' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            Alumno_ID: 'Alumno_ID' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            Unidad_ID: 'Unidad_ID' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            calificacion: 'calificacion' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            Periodo_Academico: 'Periodo_Academico' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':''
+        }
+    %}
+
+    <div id="{{ object.item }}-list">
+
+        {% if object.records_count > 0 %}
+        <div class="table-data-wrapper">
+            <table class="table table-data" >
+                <thead>
+                    <tr class="{{ constant('DEFAULT_TABLE_HEADING_CLASS') }}">
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'left' %}
+                        <th>{{ constant('ACTION_CONST') }}</th>
+                        {% endif %}
+                        <th>{{ object.fields.ID }}</th>
+                        <th>{{ object.fields.Alumno_ID }}</th>
+                        <th>{{ object.fields.Unidad_ID }}</th>
+                        <th>{{ object.fields.calificacion }}</th>
+                        <th>{{ object.fields.Periodo_Academico }}</th>
+                            {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'right' %}
+                        <th>{{ constant('ACTION_CONST') }}</th>
+                            {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(0, object.records_count - 1) %}
+                    <tr>
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'left' %}
+                        <td class="has-btn-group no-ellipsis">
+                            <div class="btn-group">
+                                <a href="#" class="btn btn-sm btn-primary btn-view-record" data-target="{{ object.item }}/view/{{ object.pk_url_params[loop.index0] }}" data-bs-toggle="tooltip" data-bs-title="{{ constant('VIEW_DETAIL') }}"><span class="{{ constant('ICON_VIEW') }} icon-md"></span></a>
+                                {% if object.update_record_authorized[object.pk_concat_values[loop.index0]] == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/edit/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-title="{{ constant('EDIT') }}"><span class="{{ constant('ICON_EDIT') }} icon-md"></span></a>
+                                {% endif %}
+                                {% if object.can_create == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/delete/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-title="{{ constant('DELETE_CONST') }}"><span class="{{ constant('ICON_DELETE') }} icon-md"></span></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                        <td{{ filtered_class.ID|raw }}>{{ object.ID[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.Alumno_ID|raw }}>{{ object.Alumno_ID[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.Unidad_ID|raw }}>{{ object.Unidad_ID[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.calificacion|raw }}>{{ object.calificacion[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.Periodo_Academico|raw }}>{{ object.Periodo_Academico[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'right' %}
+                        <td class="has-btn-group no-ellipsis">
+                            <div class="btn-group">
+                                <a href="#" class="btn btn-sm btn-primary btn-view-record" data-target="{{ object.item }}/view/{{ object.pk_url_params[loop.index0] }}" data-bs-toggle="tooltip" data-bs-title="{{ constant('VIEW_DETAIL') }}"><span class="{{ constant('ICON_VIEW') }} icon-md"></span></a>
+                                {% if object.update_record_authorized[object.pk_concat_values[loop.index0]] == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/edit/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-title="{{ constant('EDIT') }}" data-delay="500"><span class="{{ constant('ICON_EDIT') }} icon-md"></span></a>
+                                {% endif %}
+                                {% if object.can_create == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/delete/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-title="{{ constant('DELETE_CONST') }}" data-delay="500"><span class="{{ constant('ICON_DELETE') }} icon-md"></span></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div> <!-- END table-responsive -->
+
+        {% else %}
+        <p class="text-semibold">
+            {{ alert(constant('NO_RECORD_FOUND'), 'alert-info has-icon')|raw }}
+        </p>
+        {% endif %}
+
+        <div id="pagination-wrapper" class="d-flex justify-content-between p-4">
+            {{ object.pagination_html|raw }}
+        </div>
+    </div> <!-- END {{ object.item }}-list -->
+
+    {% endblock object_list %}
+    {# END Partial block - rendered alone on the research results #}
+
+</div> <!-- END card -->

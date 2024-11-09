@@ -1,0 +1,83 @@
+<div class="modal-header text-bg-info">
+    <p class="modal-title h1 mb-0 fs-5">{{ object.item_label }}</p>
+    <button type="button" class="btn-close modal-close" aria-label="{{ constant('CLOSE') }}"></button>
+</div>
+<div class="modal-body">
+    <div id="single-record-debug-content">{{ object.debug_content|raw }}</div>
+    {# Partial block print_view - rendered alone on the print view #}
+    {% block print_view %}
+    {% if object.records_count > 0 %}
+    <table id="single-record-export-table" class="table table-sm table-borderless">
+        <thead>
+            <tr>
+                <th></th>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(0, object.records_count - 1) %}
+                        <tr>
+                <th>store_id</th>
+                <td>{{ object.store_id[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>manager_staff_id</th>
+                <td>{{ object.manager_staff_id[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>address_id</th>
+                <td>{{ object.address_id[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+            </tr>
+                        <tr>
+                <th>last_update</th>
+                <td>{{ toDate(object.last_update[ loop.index0 ], 'dd MMMM yyyy H:m a')|raw }}</td>
+            </tr>
+                        {% if object.external_tables_count > 0 %}
+            {% for j in range(0, object.external_tables_count - 1) %}
+            <tr>
+                <th style="vertical-align:text-top !important;padding-top:.5rem;">{{ object.external_tables_labels[j] }}</th>
+                <td class="no-ellipsis">
+                    {% if object.external_rows_count[i][j] > 0 %}
+                    <table class="table table-sm">
+                        <thead class="text-bg-light">
+                            <tr>
+                                {% for field, value in object.external_fields[i][j].fieldnames %}
+                                <th>{{ value }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {# Loop records #}
+
+                            {% for k in range(0, object.external_rows_count[i][j] - 1) %}
+                            <tr>
+
+                                {# Loop fields #}
+
+                                {% for field, value in object.external_fields[i][j].fields %}
+                                <td>{{ object.external_fields[i][j].fields[field][k]|raw }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    {{ constant('NO_RECORD_FOUND') }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+                        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% endblock print_view %}
+    {# END Partial block print_view - rendered alone on the print view #}
+</div>
+<div class="modal-footer">
+    <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/print-view/{{ object.pk_url_params[0] }}" class="btn btn-primary" target="_blank" rel="nofollow">{{ constant('EXPORT') }} / {{ constant('PRINT') }}</a>
+    <button type="button" class="btn btn-light modal-close">{{ constant('CLOSE') }} <i class="{{ constant('ICON_CANCEL') }} append"></i></button>
+</div>

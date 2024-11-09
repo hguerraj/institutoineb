@@ -1,0 +1,96 @@
+<script>
+
+    {#
+    ================ Core JS loaded ================
+    #}
+
+    loadjs.ready('core', function() {
+        // tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {delay: { "show": 500, "hide": 100 }})
+        });
+
+        if (adminUrl === 'https://www.phpcrudgenerator.com/admin/' && $('input[type="file"]')[0]) {
+            $('input[type="file"]').on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('The file/image uploaders are disabled in the demo.');
+                return false;
+            });
+        }
+    });
+
+
+    {#
+    ================ CORE ================
+    #}
+    loadjs.ready(['core'], function() {
+        if ($('input[data-decimals]')[0]) {
+            $('input[data-decimals]').on('change', function() {
+                $decimals = parseInt($(this).attr('data-decimals'));
+                $(this).val(parseFloat($(this).val()).toFixed($decimals));
+            });
+        }
+
+        if ($('.ajax-select')[0]) {
+            if (!loadjs.isDefined("slimselect/slimselect.min.js")) {
+                loadjs([classUrl + "phpformbuilder/plugins/slimselect/slimselect.min.css", classUrl + "phpformbuilder/plugins/slimselect/themes/bootstrap5.min.css", classUrl + "phpformbuilder/plugins/slimselect/slimselect.min.js"], "slimselect/slimselect.min.js");
+            }
+            loadjs.ready(['core', 'slimselect/slimselect.min.js'], function() {
+                $('.ajax-select').each(function() {
+                    const selectName = $(this).prop('id');
+                    new SlimSelect({
+                        select: '#' + selectName,
+                        searchText: '{{ constant('SEARCH') }}',
+                        searchingText: '{{ constant('SEARCHING') }}',
+                        ajax: function (search, callback) {
+                            // Check search value. If you dont like it callback(false) or callback('Message String')
+                            if (search.length < 2) {
+                                callback('{{ constant('TYPE_2_OR_MORE_CHARACTERS') }}');
+                                return;
+                            }
+
+                            // Perform your own ajax request here
+                            const formData = new FormData();
+                            formData.append('selectname', selectName);
+                            formData.append('search', search);
+                            formData.append('page', 1);
+                            fetch('{{ constant('ADMIN_URL') }}inc/ajax-select.php', {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                cache: 'no-cache',
+                                mode: 'same-origin',
+                                body: formData
+                            })
+                            .then(function (response) {
+                                return response.json()
+                            })
+                            .then(function (json) {
+                                let data = [];
+                                json.results.forEach(res => {
+                                    data.push({
+                                        text: res.text,
+                                        value: res.id
+                                    });
+                                });
+                                if (json.debugAjaxContent[0] && $('#debug-content')[0]) {
+                                    $('#debug-content').css('opacity', '0').html(json.debugAjaxContent).animate({'opacity': '1'}, {duration: 600});
+                                }
+
+                                // Upon successful fetch send data to callback function.
+                                // Be sure to send data back in the proper format.
+                                // Refer to the method setData for examples of proper format.
+                                callback(data)
+                            })
+                            .catch(function(error) {
+                                // If any erros happened send false back through the callback
+                                callback(false)
+                            })
+                        }
+                    });
+                });
+            });
+        }
+    });
+    </script>

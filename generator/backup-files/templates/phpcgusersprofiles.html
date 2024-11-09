@@ -1,0 +1,178 @@
+<div class="px-4">
+    {# Partial block debug - rendered alone on the research results #}
+    {% block object_debug %}
+    <div id="debug-content">{{ object.debug_content|raw }}</div>
+    {% endblock object_debug %}
+    {# END Partial block - rendered alone on the research results #}
+    <div id="toolbar" class="d-lg-flex flex-wrap justify-content-between">
+        {% if object.records_count > 0 %}
+
+        <div class="d-flex ms-auto order-lg-2">
+            {{ object.select_number_per_page|raw }}
+        </div>
+
+        <hr class="w-100 d-lg-none">
+
+        {% endif %}
+        <div class="d-flex order-lg-0 mb-3">
+            {% if object.can_create == true %}
+            <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/create" class="btn btn-sm me-1 btn-primary d-flex align-items-center"><i class="{{ constant('ICON_PLUS') }} prepend"></i>{{ constant('ADD_NEW') }}</a>
+            {% endif %}
+                {% if object.records_count > 0 %}
+                {{ object.export_data_button|raw }}
+                {% endif %}
+        </div>
+
+        <div class="order-lg-1 mx-lg-auto">
+            <form name="rp-search-form" id="rp-search-form" class="form-inline justify-content-center">
+                <div class="input-group input-group-sm">
+                    <button class="input-group-text btn {{ constant('DEFAULT_BUTTONS_CLASS') }} dropdown-toggle ps-4 pe-3" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                    <ul id="rp-search-field" class="dropdown-menu">
+                        {% for field_name, field_display_name in object.fields %}
+                        {% set active = '' %}
+                        {% if field_name == attribute(session.rp_search_field, object.table) %}
+                        {% set active = ' active' %}
+                        {% elseif field_name == '' %}
+                        {% set active = ' active' %}
+                        {% endif %}
+                        <li><a class="dropdown-item{{ active }}" href="#" rel="noindex" data-value="{{ field_name }}">{{ field_display_name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% set search_value = '' %}
+                    {% if attribute(session.rp_search_string, object.table) is defined %}
+                    {% set search_value = attribute(session.rp_search_string, object.table) %}
+                    {% endif %}
+                    <input id="rp-search" name="rp-search" type="text" value="{{ search_value }}" placeholder="{{ constant('SEARCH') }}" class="form-control form-control-sm flex-grow-1">
+                    <button id="rp-search-submit" class="input-group-text btn {{ constant('DEFAULT_BUTTONS_CLASS') }}" data-ladda-button="true" data-style="zoom-in" type="submit"><span class="ladda-label"><i class="{{ constant('ICON_SEARCH') }}"></i></span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Partial block list - rendered alone on the research results #}
+    {% block object_list %}
+
+    {%
+        set filtered_class = {
+            id: 'id' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            profile_name: 'profile_name' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_carreras: 'r_carreras' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_carreras: 'u_carreras' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_carreras: 'cd_carreras' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_carreras: 'cq_carreras' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_grados: 'r_grados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_grados: 'u_grados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_grados: 'cd_grados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_grados: 'cq_grados' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_phpcg_users: 'r_phpcg_users' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_phpcg_users: 'u_phpcg_users' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_phpcg_users: 'cd_phpcg_users' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_phpcg_users: 'cq_phpcg_users' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            r_phpcg_users_profiles: 'r_phpcg_users_profiles' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            u_phpcg_users_profiles: 'u_phpcg_users_profiles' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cd_phpcg_users_profiles: 'cd_phpcg_users_profiles' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':'',
+            cq_phpcg_users_profiles: 'cq_phpcg_users_profiles' in object.active_filtered_fields?' class="' ~ constant('ADMIN_FILTERED_COLUMNS_CLASS') ~ '"':''
+        }
+    %}
+
+    <div id="{{ object.item }}-list">
+
+        {% if object.records_count > 0 %}
+        <div class="table-data-wrapper">
+            <table class="table table-data table-togglable"  data-toggle-column="first" data-toggle-selector=".footable-toggle">
+                <thead>
+                    <tr class="{{ constant('DEFAULT_TABLE_HEADING_CLASS') }}">
+                        <th>&nbsp;</th>
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'left' %}
+                        <th>{{ constant('ACTION_CONST') }}</th>
+                        {% endif %}
+                        <th>{{ object.fields.id }}</th>
+                        <th>{{ object.fields.profile_name }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_carreras }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_carreras }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_carreras }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_carreras }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_grados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_grados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_grados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_grados }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_phpcg_users }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_phpcg_users }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_phpcg_users }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_phpcg_users }}</th>
+                        <th data-breakpoints="all">{{ object.fields.r_phpcg_users_profiles }}</th>
+                        <th data-breakpoints="all">{{ object.fields.u_phpcg_users_profiles }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cd_phpcg_users_profiles }}</th>
+                        <th data-breakpoints="all">{{ object.fields.cq_phpcg_users_profiles }}</th>
+                            {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'right' %}
+                        <th>{{ constant('ACTION_CONST') }}</th>
+                            {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(0, object.records_count - 1) %}
+                    <tr>
+                        <td></td>
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'left' %}
+                        <td class="has-btn-group no-ellipsis">
+                            <div class="btn-group">
+                                {% if object.update_record_authorized[object.pk_concat_values[loop.index0]] == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/edit/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-title="{{ constant('EDIT') }}"><span class="{{ constant('ICON_EDIT') }} icon-md"></span></a>
+                                {% endif %}
+                                {% if object.can_create == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/delete/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-title="{{ constant('DELETE_CONST') }}"><span class="{{ constant('ICON_DELETE') }} icon-md"></span></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                        <td{{ filtered_class.id|raw }}>{{ object.id[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.profile_name|raw }}>{{ object.profile_name[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_carreras|raw }}>{{ object.r_carreras[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_carreras|raw }}>{{ object.u_carreras[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_carreras|raw }}>{{ object.cd_carreras[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_carreras|raw }}>{{ object.cq_carreras[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_grados|raw }}>{{ object.r_grados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_grados|raw }}>{{ object.u_grados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_grados|raw }}>{{ object.cd_grados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_grados|raw }}>{{ object.cq_grados[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_phpcg_users|raw }}>{{ object.r_phpcg_users[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_phpcg_users|raw }}>{{ object.u_phpcg_users[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_phpcg_users|raw }}>{{ object.cd_phpcg_users[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_phpcg_users|raw }}>{{ object.cq_phpcg_users[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.r_phpcg_users_profiles|raw }}>{{ object.r_phpcg_users_profiles[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.u_phpcg_users_profiles|raw }}>{{ object.u_phpcg_users_profiles[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cd_phpcg_users_profiles|raw }}>{{ object.cd_phpcg_users_profiles[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        <td{{ filtered_class.cq_phpcg_users_profiles|raw }}>{{ object.cq_phpcg_users_profiles[ loop.index0 ]|replace({'[|]': ' '}) }}</td>
+                        {% if constant('ADMIN_ACTION_BUTTONS_POSITION') == 'right' %}
+                        <td class="has-btn-group no-ellipsis">
+                            <div class="btn-group">
+                                {% if object.update_record_authorized[object.pk_concat_values[loop.index0]] == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/edit/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" data-bs-title="{{ constant('EDIT') }}" data-delay="500"><span class="{{ constant('ICON_EDIT') }} icon-md"></span></a>
+                                {% endif %}
+                                {% if object.can_create == true %}
+                                <a href="{{ constant('ADMIN_URL') }}{{ object.item }}/delete/{{ object.pk_url_params[loop.index0] }}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-title="{{ constant('DELETE_CONST') }}" data-delay="500"><span class="{{ constant('ICON_DELETE') }} icon-md"></span></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div> <!-- END table-responsive -->
+
+        {% else %}
+        <p class="text-semibold">
+            {{ alert(constant('NO_RECORD_FOUND'), 'alert-info has-icon')|raw }}
+        </p>
+        {% endif %}
+
+        <div id="pagination-wrapper" class="d-flex justify-content-between p-4">
+            {{ object.pagination_html|raw }}
+        </div>
+    </div> <!-- END {{ object.item }}-list -->
+
+    {% endblock object_list %}
+    {# END Partial block - rendered alone on the research results #}
+
+</div> <!-- END card -->

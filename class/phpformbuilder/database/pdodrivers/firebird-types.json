@@ -1,0 +1,56 @@
+{
+    "SMALLINT": {
+        "type": "smallint",
+        "subtypes": {
+            "0": "smallint",
+            "1": "decimal",
+            "2": "decimal"
+        },
+        "range": 5
+    },
+    "INTEGER": {
+        "type": "int",
+        "subtypes": {
+            "0": "smallint",
+            "1": "decimal",
+            "2": "decimal"
+        },
+        "range": 10
+    },
+    "BIGINT": {
+        "type": "bigint",
+        "subtypes": {
+            "0": "smallint",
+            "1": "decimal",
+            "2": "decimal"
+        },
+        "range": 19
+    },
+    "FLOAT": {
+        "type": "float",
+        "range": 19
+    },
+    "DOUBLE": {
+        "type": "double",
+        "range": 10
+    },
+    "DATE": {
+        "type": "date"
+    },
+    "TIME": {
+        "type": "time"
+    },
+    "TIMESTAMP": {
+        "type": "timestamp"
+    },
+    "CHAR": {
+        "type": "char"
+    },
+    "VARCHAR": {
+        "type": "varchar",
+        "range": 19
+    },
+    "UNKNOWN": {
+        "type": "text"
+    }
+}

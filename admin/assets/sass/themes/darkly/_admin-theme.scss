@@ -1,0 +1,26 @@
+// Admin custom colors
+// @import "theme-colors";
+
+// Admin color palette
+@import "../../admin-core/admin-color-palette";
+
+// $theme-light-colors: ();
+
+$theme-dark-colors: ("light", "primary", "success", "info", "warning", "danger", "dark", "secondary");
+
+// $light-selector: prefix-list-elements($theme-light-colors, "&.bg-");
+$dark-selector: prefix-list-elements($theme-dark-colors, "&.bg-");
+
+.navbar {
+    // #{$light-selector} {
+        // @include deprecate("`.navbar-light`", "v5.2.0", "v6.0.0", true);
+    // }
+    #{$dark-selector} {
+        @include navbar-dark();
+    }
+}
+
+// Misc
+.autocomplete-suggestion {
+    color: $dark !important;
+}

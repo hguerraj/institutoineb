@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+Options +FollowSymLinks -MultiViews
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^login.php /admin/login [R=301,L]
+
+#############################################################
+# All URLs are redirected to /admin/index.php
+# Then the router does its job to match the request.
+#############################################################
+
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# if you installed the CRUD in a subfolder, add it to the path below.
+# ie: RewriteRule . /your-folder/admin/index.php [QSA,L]
+
+RewriteRule . /institutoineb/admin/index.php [QSA,L]
+</IfModule>

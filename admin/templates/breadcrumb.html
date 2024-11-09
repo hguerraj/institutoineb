@@ -1,0 +1,11 @@
+<nav id="breadcrumb" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+    {% for bc in breadcrumb %}
+    {% if bc.active != true %}
+        <li class="breadcrumb-item"><a href="{{ constant('ADMIN_URL') }}{{bc.link}}">{{bc.text|raw}}</a></li>
+    {% else %}
+        <li class="breadcrumb-item active" aria-current="page">{{bc.text|raw}}</li>
+    {% endif %}
+    {% endfor %}
+    </ol>
+</nav>

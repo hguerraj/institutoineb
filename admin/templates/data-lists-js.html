@@ -1,0 +1,722 @@
+<script>
+    /* global variables & functions
+    -------------------------------------------------- */
+
+    let nestedContent = {};
+
+    let overlayScrollbarInstance;
+
+    let isSearchResultsList = false;
+
+    const footableParser = function(valueOrElement) {
+        return $(valueOrElement).html();
+    };
+
+    const initTimeout = function(tableTogglableWidth) {
+
+        // we have to wait until table-togglable reaches its final size
+        setTimeout(function() {
+            let newWidth = $('.table-togglable').width();
+            if (newWidth == tableTogglableWidth) {
+                init();
+            } else {
+                initTimeout(newWidth);
+            }
+        }, 50);
+    };
+
+    // init all events AFTER footable if $('.table-data')[0]
+    const init = function() {
+
+        // Sorting
+        if ($('.sorting')[0]) {
+            if (!isSearchResultsList) {
+                $('.sorting').each(function() {
+                    $(this).find('a').on('click', function(e) {
+                        e.preventDefault();
+                        let dataField = $(this).attr('data-field'),
+                            dataDirection = $(this).attr('data-direction');
+                        $.ajax({
+                            url: '{{ constant('ADMIN_URL') }}inc/sorting.php',
+                            type: 'GET',
+                            data: {
+                                'dataTable': '{{ object.table }}',
+                                'dataField': dataField,
+                                'dataDirection': dataDirection
+                            }
+                        }).done(function(data) {
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 200);
+
+                            return false;
+                        }).fail(function(data, statut, error) {
+                            console.log(error);
+                        });
+                    })
+                });
+            } else {
+                $('a[class^="sorting-"]').css({'opacity': 0, 'cursor': 'default'}).on('click', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+            }
+        }
+
+        if (!isSearchResultsList) {
+            loadjs([
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/frameworks/all-frameworks.min.css',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/slimselect/slimselect.min.css',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/slimselect/slimselect.min.js',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/slimselect/themes/bootstrap5.min.css',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/litepicker/litepicker.min.js'
+                ], 'bundleC',
+                {
+                    async: false
+                }
+            );
+
+            loadjs([
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/pickadate/lib/compressed/picker.js',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/pickadate/lib/compressed/picker.date.js',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/pickadate/lib/compressed/picker.time.js',
+                '{{ constant('ADMIN_URL') }}assets/javascripts/plugins/jeditable.min.js',
+                ], 'bundleD',
+                {
+                    async: false
+                }
+            );
+
+            loadjs([
+                '{{ constant('ADMIN_URL') }}assets/javascripts/plugins/jquery.autocomplete.min.js',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/ladda/ladda-themeless.min.css',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/ladda/spin.min.js',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/ladda/ladda.min.js',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/pretty-checkbox/pretty-checkbox.min.css',
+                '{{ constant('CLASS_URL') }}phpformbuilder/plugins/pretty-checkbox/phpfb-pretty-checkbox.js'
+                ], 'bundleG',
+                {
+                    async: false
+                }
+            );
+        } else {
+            initbundleD();
+            initBundleF();
+        }
+    };
+
+    {#
+    ================ Core JS loaded ================
+    #}
+
+    loadjs.ready('core', function() {
+        loadjs([
+            '{{ constant('ADMIN_URL') }}assets/javascripts/plugins/moment.min.js',
+            '{{ constant('ADMIN_URL') }}assets/javascripts/plugins/footable.min.js'
+            ], 'bundleA',
+            {
+                async: false
+            }
+        );
+
+        // Number/page
+        if ($('#npp')[0]) {
+            $('#npp').on('change', function () {
+                $('#npp-form').submit();
+            });
+        }
+
+        // auto-enable filters
+        if ($('#filters-list')[0]) {
+            if ($('#filters-list').hasClass('auto-enable-filters')) {
+                $('#filters-list select').on('change', function() {
+                    $('#filters-list').submit();
+                });
+            }
+        }
+    });
+
+    {#
+    ================ CORE + Footable ================
+    #}
+
+    const initBundleA = function() {
+        // extract nested tables
+        let index = 0,
+            $nested = $('.table-data td table');
+        nestedContent = {
+            id: [],
+            html: []
+        };
+        $nested.each(function() {
+            $(this).addClass('nested-table');
+            let $parentTd = $(this).closest('td'),
+                parentTdHtml = $parentTd.html();
+            nestedContent.id[index] = 'has-nested' + index;
+            nestedContent.html[index] = parentTdHtml;
+            $parentTd.attr('id', 'has-nested' + index).html('');
+            index ++;
+        });
+        if ($('.table-togglable')[0]) {
+            $('.table-togglable').find('tbody > tr').each(function() {
+                $(this).css('background-color', $(this).css('background-color'));
+            });
+
+            $('.table-togglable').on({
+                "ready.ft.table": function(e, ft){
+                    // bind to the plugin initialize event to do something
+                    $('.footable-toggle').css('cursor', 'pointer');
+
+                    // init all events AFTER footable
+                    initTimeout($('.table-togglable').width());
+                }
+            }).footable();
+        } else {
+            init();
+        }
+    };
+
+    loadjs.ready(['core', 'bundleA'], initBundleA);
+
+    {#
+    ================ CORE + Footable + Slimselect ================
+    #}
+    const initBundleC = function() {
+        // tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {delay: { "show": 750, "hide": 100 }})
+        });
+        if ($('#filters-list')[0]) {
+            document.querySelectorAll('[data-slimselect="true"]').forEach(el => {
+                const dataAllowDeselect = el.dataset.allowDeselect === undefined?false:el.dataset.allowDeselect !== 'false';
+                const dataAllowDeselectOption = el.dataset.allowDeselectOption === undefined?true:el.dataset.allowDeselectOption !== 'false';
+                const dataPlaceholder = el.dataset.placeholder === undefined?null:el.dataset.placeholder;
+                const dataShowSearch = el.dataset.showSearch === undefined?true:el.dataset.showSearch !== 'false';
+                new SlimSelect({
+                    select: el,
+                    allowDeselect: dataAllowDeselect,
+                    allowDeselectOption : dataAllowDeselectOption,
+                    deselectLabel: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 460.775 460.775" width=".75em" height=".5em" fill="#3F6078" xml:space="preserve"> <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55  c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55  c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505  c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55  l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719  c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"/></svg>',
+                    placeholder: dataPlaceholder,
+                    showSearch : dataShowSearch
+                });
+            });
+            // daterange filters
+            if ($('#filters-list .litepick')[0]) {
+                $('#filters-list .litepick').each(function() {
+                    var inputId = $(this).prop('id'),
+                        minDate = $(this).attr('data-min-date'),
+                        maxDate = $(this).attr('data-max-date'),
+                        minDateObject = new Date($(this).attr('data-min-date')),
+                        maxDateObject = new Date($(this).attr('data-max-date')),
+                        minYear = parseInt(minDateObject.getFullYear()),
+                        maxYear = parseInt(maxDateObject.getFullYear()),
+                        minMonth = parseInt(minDateObject.getMonth()),
+                        maxMonth = parseInt(maxDateObject.getMonth());
+
+                    var yearsDropdown = false;
+                    if (maxYear - minYear > 0) {
+                        yearsDropdown = true;
+                    }
+
+                    var lp = new Litepicker({
+                        element: document.getElementById(inputId),
+                        singleMode: false,
+                        numberOfMonths: 2,
+                        numberOfColumns: 2,
+                        lang: '{{ constant('DATETIMEPICKERS_LANG')|replace({'_': '-'}) }}',
+                        minDate: $(this).attr('data-min-date'),
+                        maxDate: $(this).attr('data-max-date'),
+                        useResetBtn: true,
+                        buttonText: {
+                            reset: '{{ constant('RESET') }}<i class="far fa-window-close fa-2x text-danger ms-2"></i>'
+                        },
+                        onShow: function() {
+                            if (this.getDate() === null) {
+                                this.gotoDate(minDateObject, 0);
+                                this.gotoDate(maxDateObject, 1);
+                            }
+                        },
+                        // startDate: $(this).attr('data-min-date'),
+                        // endDate: $(this).attr('data-max-date'),
+                        splitView: true,
+                        dropdowns: {
+                            minYear: minYear,
+                            maxYear: maxYear,
+                            months: true,
+                            years: yearsDropdown,
+                        }
+                    });
+                });
+            }
+            // ajax filters
+            if ($('#filters-list .ajax-filter')[0]) {
+                document.querySelectorAll('#filters-list .ajax-filter').forEach(el => {
+                    const dataAllowDeselect = el.dataset.allowDeselect === undefined?false:el.dataset.allowDeselect !== 'false';
+                    const dataAllowDeselectOption = el.dataset.allowDeselectOption === undefined?true:el.dataset.allowDeselectOption !== 'false';
+                    const dataPlaceholder = el.dataset.placeholder === undefined?null:el.dataset.placeholder;
+                    new SlimSelect({
+                        select: el,
+                        allowDeselect: dataAllowDeselect,
+                        allowDeselectOption : dataAllowDeselectOption,
+                        deselectLabel: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 460.775 460.775" width=".75em" height=".5em" fill="#3F6078" xml:space="preserve"> <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55  c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55  c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505  c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55  l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719  c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"/></svg>',
+                        placeholder: dataPlaceholder,
+                        searchText: '{{ constant('SEARCH') }}',
+                        searchingText: '{{ constant('SEARCHING') }}',
+                        ajax: function (search, callback) {
+                            // Check search value. If you dont like it callback(false) or callback('Message String')
+                            if (search.length < 2) {
+                                callback('{{ constant('TYPE_2_OR_MORE_CHARACTERS') }}');
+                                return;
+                            }
+
+                            // Perform your own ajax request here
+                            const formData = new FormData();
+                            formData.append('selectname', el.id);
+                            formData.append('search', search);
+                            formData.append('page', 1);
+                            fetch('{{ constant('ADMIN_URL') }}inc/ajax-filter.php', {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                cache: 'no-cache',
+                                mode: 'same-origin',
+                                body: formData
+                            })
+                            .then(function (response) {
+                                return response.json()
+                            })
+                            .then(function (json) {
+                                let data = [];
+                                json.results.forEach(res => {
+                                    data.push({
+                                        text: res.text,
+                                        value: res.id
+                                    });
+                                });
+                                if (json.debugAjaxContent[0] && $('#debug-content')[0]) {
+                                    $('#debug-content').css('opacity', '0').html(json.debugAjaxContent).animate({'opacity': '1'}, {duration: 600});
+                                }
+
+                                // Upon successful fetch send data to callback function.
+                                // Be sure to send data back in the proper format.
+                                // Refer to the method setData for examples of proper format.
+                                callback(data)
+                            })
+                            .catch(function(error) {
+                                // If any erros happened send false back through the callback
+                                callback(false)
+                            })
+                        }
+                    });
+                });
+            }
+        }
+    };
+    loadjs.ready(['core', 'bundleA', 'bundleC'], initBundleC);
+
+    {#
+    ================ CORE + Footable + jEdit ================
+    #}
+    const initbundleD = function() {
+        // EDIT IN PLACE - TEXT INPUTS
+        $('.jedit-text').editable('{{ constant('ADMIN_URL') }}inc/jedit.php', {
+            cssclass: 'form-horizontal',
+            type   : 'text',
+            indicator     : '<img src="{{ constant('ADMIN_URL') }}assets/images/ajax-loader.svg" alt="{{ constant('RECORDING') }} ...">',
+            cancel        : '{{ constant('CANCEL') }}',
+            submit        : '{{ constant('OK') }}',
+            onblur        : 'ignore',
+            onsubmit: function() {
+                $(this).closest('[class^="jedit-"]').removeClass('active');
+            },
+            onreset: function() {
+                $(this).closest('[class^="jedit-"]').removeClass('active');
+            },
+            callback     : function (value, settings) {
+                $(this).html(value.replace(/<script(\n?\r?.*)+<\/script>/gm, '').trim());
+            }
+        });
+
+        $('.jedit-textarea').editable('{{ constant('ADMIN_URL') }}inc/jedit.php', {
+            cssclass: 'form-horizontal',
+            type      : 'textarea',
+            indicator     : '<img src="{{ constant('ADMIN_URL') }}assets/images/ajax-loader.svg" alt="{{ constant('RECORDING') }} ...">',
+            rows    : 5,
+            cols    : 30,
+            indicator : '<img src="{{ constant('ADMIN_URL') }}assets/images/ajax-loader.svg" alt="{{ constant('RECORDING') }} ...">',
+            cancel        : '{{ constant('CANCEL') }}',
+            submit        : '{{ constant('OK') }}',
+            onblur        : 'ignore',
+            onsubmit: function() {
+                $(this).closest('[class^="jedit-"]').removeClass('active');
+            },
+            onreset: function() {
+                $(this).closest('[class^="jedit-"]').removeClass('active');
+            },
+            callback     : function (value, settings) {
+                $(this).html(value);
+            }
+        });
+
+        // EDIT IN PLACE - BOOLEAN
+        $('.jedit-boolean').editable('{{ constant('ADMIN_URL') }}inc/jedit.php', {
+            cssclass      : 'form-inline',
+            type          : 'select',
+            data    : {"1":"{{ constant('YES') }}","0":"{{ constant('NO') }}","selected":"1"},
+            indicator     : '<img src="{{ constant('ADMIN_URL') }}assets/images/ajax-loader.svg" alt="{{ constant('RECORDING') }} ...">',
+            cancel        : '{{ constant('CANCEL') }}',
+            submit        : '<button type="submit" class="btn btn-primary btn-xs mt-2">{{ constant('OK') }}</button>',
+            onblur        : 'ignore',
+            onsubmit      : function() {
+                $(this).closest('[class^="jedit-"]').removeClass('active');
+            },
+            onreset       : function() {
+                $(this).closest('[class^="jedit-"]').removeClass('active');
+            },
+            callback      : function (value, settings) {
+                if (value > 0) {
+                    $(this).html('<svg class="svg-inline--fa fa-check fa-w-16 icon-lg text-success" width="1em" aria-hidden="true" data-fa-processed="" data-prefix="fas" data-icon="check" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg>');
+                    // $(this).html('{{ constant('YES') }}');
+                } else {
+                    $(this).html('<svg class="svg-inline--fa fa-times fa-w-12 icon-md text-danger" width="1em" aria-hidden="true" data-fa-processed="" data-prefix="fas" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M323.1 441l53.9-53.9c9.4-9.4 9.4-24.5 0-33.9L279.8 256l97.2-97.2c9.4-9.4 9.4-24.5 0-33.9L323.1 71c-9.4-9.4-24.5-9.4-33.9 0L192 168.2 94.8 71c-9.4-9.4-24.5-9.4-33.9 0L7 124.9c-9.4 9.4-9.4 24.5 0 33.9l97.2 97.2L7 353.2c-9.4 9.4-9.4 24.5 0 33.9L60.9 441c9.4 9.4 24.5 9.4 33.9 0l97.2-97.2 97.2 97.2c9.3 9.3 24.5 9.3 33.9 0z"></path></svg>');
+                    // $(this).html('{{ constant('NO') }}');
+                }
+            }
+        });
+
+        // EDIT IN PLACE - SELECT (from vendor/twig/twig/src/Extension/CrudTwigExtension.php)
+        {{ jeditSelect(object.table, object.select_data)|raw }}
+
+        // EDIT IN PLACE - DATES
+        $('.jedit-date').editable('{{ constant('ADMIN_URL') }}inc/jedit.php', {
+            cssclass: 'form-inline',
+            type   : 'pickadate',
+            indicator     : '<img src="{{ constant('ADMIN_URL') }}assets/images/ajax-loader.svg" alt="{{ constant('RECORDING') }} ...">',
+            cancel        : '',
+            submit        : '',
+            submitdata    : function (value, settings) {
+                return { "value_submit": $('input[name="value_submit"]').val() };
+            },
+            onblur        : 'ignore',
+            onsubmit: function() {
+                $(this).closest('[class^="jedit-"]').removeClass('active');
+            },
+            onreset: function() {
+                $(this).closest('[class^="jedit-"]').removeClass('active');
+            },
+            callback     : function (value, settings) {
+                $(this).html(value);
+            }
+        });
+    };
+    loadjs.ready(['core', 'bundleA', 'bundleD'], initbundleD);
+    {#
+    ================ CORE + Footable + Table plugins ================
+    #}
+    const initBundleF = function() {
+        const getAvailableHeight = function() {
+            let availableHeight = 500; // set default minimal height
+            if ($('#navbar-main')[0] && $('#breadcrumb')[0] && $('#toolbar')[0] && $('#msg')[0] && $('#pagination-wrapper')[0]) {
+                    let navbarHeight  = $('#navbar-main').outerHeight(true),
+                    breadcrumbHeight  = $('#breadcrumb').outerHeight(true),
+                    msgHeight         = $('#msg').outerHeight(true),
+                    paginationHeight  = $('#pagination-wrapper').outerHeight(true),
+                    toolbarHeight     = $('#toolbar').outerHeight(true);
+
+                availableHeight = $(window).height() - navbarHeight - breadcrumbHeight - msgHeight - paginationHeight - toolbarHeight;
+            }
+
+
+            return availableHeight;
+        };
+
+        const reinsertNestedContent = function(nestedContent) {
+
+            // get nested tables back once footable has done its job
+            for (let i = 0; i < nestedContent.id.length; i++) {
+                $('#' + nestedContent.id[i]).html(nestedContent.html[i]);
+            }
+        };
+
+        const initTable = function() {
+            let $tableData = $('.table-data'),
+                $tableResponsive = $tableData.closest('.table-data-wrapper'),
+                tableDataWidth = $tableData.width(),
+                tableResponsiveWidth = $tableResponsive.width();
+                {% if constant('DATA_TABLES_SCROLLBAR') == true %}
+                const dataTablesVerticalScrollbar = true;
+                let availableHeight = getAvailableHeight();
+                $('.table-data-wrapper').css('height', availableHeight + 'px');
+                {% else %}
+                const dataTablesVerticalScrollbar = false;
+                {% endif %}
+            if (tableDataWidth > tableResponsiveWidth || dataTablesVerticalScrollbar) {
+                    overlayScrollbarInstance = $('.table-data-wrapper').overlayScrollbars({
+                    resize: 'vertical',
+                    paddingAbsolute: true,
+                    autoUpdate: true,
+                    className : "os-theme-round-dark",
+                    scrollbars : {
+                        clickScrolling: true,
+                    }
+                }).overlayScrollbars();
+                $('.table-data-wrapper .collapse').on('shown.bs.collapse', function() {
+                    overlayScrollbarInstance.scroll({
+                        el       : $('#' + $(this).attr('id')),
+                        scroll   : ['ifneeded', 'never'],
+                        block    : 'nearest',
+                        margin   : 40
+                    });
+                }).on('hide.bs.collapse', function() {
+                   // overlayScrollbarInstance.update();
+                });
+
+                $(window).on('resize', () => {
+                    overlayScrollbarInstance.update();
+                })
+            }
+        };
+
+        if ($('.nested-wrapper')[0]) {
+            $('.nested-wrapper').slideUp();
+            $('.toggle-nested').each(function() {
+                $(this).on('click', function() {
+                    $(this).siblings('.nested-wrapper').slideToggle();
+                });
+            });
+        }
+        if (typeof(nestedContent.id) != 'undefined') {
+            reinsertNestedContent(nestedContent);
+        }
+        initTable();
+    };
+    loadjs.ready(['core', 'bundleA'], initBundleF);
+
+    {#
+    ================ CORE + Autocomplete + Ladda ================
+    #}
+    const initBundleG = function() {
+        if ($('#rp-search-form')[0]) {
+            const l = Ladda.create( document.querySelector('#rp-search-submit'));
+            if (!$('#rp-search-field a.dropdown-item.active')[0]) {
+                $('#rp-search-field a.dropdown-item:first-child').addClass('active');
+            }
+            let selectedOption = {
+                name: $('#rp-search-field a.dropdown-item.active').text(),
+                value: $('#rp-search-field a.dropdown-item.active').data('value')
+            };
+            let autocompleteLoaded = false;
+            const initAutocomplete = function() {
+                $('#rp-search').autocomplete({
+                    serviceUrl: '{{ constant('ADMIN_URL') }}inc/search-autocomplete.php',
+                    paramName: 'search_string',
+                    minChars: 2,
+                    noCache: true,
+                    showNoSuggestionNotice: true,
+                    noSuggestionNotice: '{{ constant('NO_RESULT_FOUND') }}',
+                    params: {
+                        item: '{{ object.item }}',
+                        search_field: selectedOption.value,
+                        is_autocomplete: true
+                    },
+                    transformResult: function(response, originalQuery) {
+                        const json_response = $.parseJSON(response);
+                        if (json_response.debugAjaxContent[0] && $('#debug-content')[0]) {
+                            $('#debug-content').css('opacity', '0').html(json_response.debugAjaxContent).animate({'opacity': '1'}, {duration: 600})
+                        }
+
+                        return json_response;
+                    },
+                    onSelect: function (suggestion) {
+                        $('#rp-search-form').submit();
+                    },
+                    onSearchStart: function (query) {
+                        l.start();
+                    },
+                    onSearchComplete: function (query, suggestions) {
+                        l.stop();
+                    },
+                    onSearchError: function (query, jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                        l.stop();
+                    },
+                    type: 'POST',
+                    deferRequestBy: 400
+                });
+                $('#rp-search').attr('placeholder', '{{ constant('SEARCH') }} ' + selectedOption.name);
+                autocompleteLoaded = true;
+            };
+
+            const addResetSearchButton = function() {
+                if ($('#reset-search').length < 1 && $('#rp-search').val().length > 0) {
+                    $('#rp-search-submit').before('<button id="reset-search" class="btn btn-warning" type="button" title="{{ constant('RESET') }}"><i class="{{ constant('ICON_CANCEL') }}"></i></button>');
+                    $('#reset-search').on('click', function() {
+                        // reset session values
+                        $.ajax({
+                            url: '{{ constant('ADMIN_URL') }}inc/search-reset.php',
+                            type: 'POST',
+                            data: {
+                                table: '{{ object.table }}'
+                            }
+                        }).done(function(data) {
+                            location.reload();
+                        }).fail(function(data, statut, error) {
+                                console.log(error);
+                        });
+                    });
+                }
+            };
+
+            $('#rp-search-field a.dropdown-item').on('click', function(e) {
+                $('#rp-search-field a.dropdown-item').removeClass('active');
+                $(e.target).addClass('active');
+                selectedOption.name = $(e.target).text();
+                selectedOption.value = $(e.target).data('value');
+                initAutocomplete();
+            });
+
+            $('#rp-search-field a.dropdown-item.active').trigger('click');
+
+            $('#rp-search-form').on('submit', function(e) {
+                e.preventDefault();
+                l.start();
+                const target = $('#{{ object.item }}-list').parent('div');
+                $.ajax({
+                        url: '{{ constant('ADMIN_URL') }}search/{{ object.item }}',
+                        type: 'POST',
+                        data: {
+                            search_field: selectedOption.value,
+                            search_string: $('#rp-search').val()
+                        }
+                }).done(function(data) {
+                    l.stop();
+                    data = JSON.parse(data);
+                    $('#{{ object.item }}-list').html($(data.template).html());
+                    if (data.debugAjaxContent[0] && $('#debug-content')[0]) {
+                        $('#debug-content').css('opacity', '0').html(data.debugAjaxContent).animate({'opacity': '1'}, {duration: 600});
+                    }
+                    isSearchResultsList = true;
+                    initBundleA();
+                    initBundleG();
+                    addResetSearchButton();
+                }).fail(function(data, statut, error) {
+                        console.log(error);
+                });
+                return false;
+            });
+
+            addResetSearchButton();
+        }
+
+        {#
+        ================ BULK CHECK ================
+        #}
+        if ($('#bulk-delete-btn')[0]) {
+            const prettyOptions = {
+                prettyWrapper  : {
+                    baseClass      : 'pretty',
+                    defaultClass   : 'p-icon',
+                    checkboxStyle  : 'p-1',
+                    radioStyle     : '',
+                    fill           : '',
+                    plain          : 'p-plain',
+                    animations     : 'p-smooth',
+                    size           : 'bigger',
+                },
+                labelWrapper   : {
+                    color          : 'p-',
+                    icon           : '',
+                },
+                toggle         : true,
+                toggleOn: {
+                    label: '',
+                    color: 'text-success',
+                    icon : '{{ constant('ICON_CHECKMARK') }}'
+                },
+                toggleOff: {
+                    label: '',
+                    color: 'text-dark',
+                    icon : '{{ constant('ICON_CANCEL') }}'
+                }
+            };
+            new PrettyCheckbox('.table-data', prettyOptions);
+            $('#bulk-check-toggle').on('click', function() {
+                var checkBoxes = $('.bulk-check');
+                checkBoxes.prop('checked', !checkBoxes.prop('checked'));
+                if (checkBoxes.prop('checked')) {
+                    $('.table-data tbody tr').addClass('bulk-checked');
+                } else {
+                    $('.table-data tbody tr').removeClass('bulk-checked');
+                }
+            });
+
+            $('.bulk-check').on('click', function() {
+                $(this).closest('tr').toggleClass('bulk-checked');
+            });
+
+            $('#bulk-delete-modal').modal();
+
+            $('#bulk-delete-btn').on('click', function() {
+                var records = [];
+                $(".bulk-check:checked").each(function() {
+                    records.push($(this).attr('data-id'));
+                });
+                if (records.length < 1) {
+                    alert('No record selected');
+                    return false;
+                }
+                $('#bulk-delete-modal #records-count').text(records.length);
+                $('#bulk-delete-modal').modal('open');
+                $('#bulk-delete-confirm-btn').on('click', function() {
+                    $.ajax({
+                        url: '{{ constant('ADMIN_URL') }}inc/forms/{{ object.item }}-bulk-delete.php',
+                        type: 'POST',
+                        data: {
+                            'records': records
+                        }
+                    }).done(function(data, statut, error) {
+                        $('#bulk-delete-modal').modal('close');
+                        $('#msg').html(data);
+                        if (!('#debug-db-queries-is-enabled')[0]) {
+                            records.forEach(function(rid) {
+                                document.getElementById('bulk-check-' + rid).closest('tr').remove();
+                            });
+                        }
+                        $([document.documentElement, document.body]).animate({ scrollTop: $("#msg .alert").offset().top }, 400);
+                    }).fail(function(data, statut, error) {
+                        console.log(error);
+                    });
+                });
+
+            });
+        }
+
+        {#
+        ================ SINGLE RECORD VIEWS ================
+        #}
+        if ($('.btn-view-record')[0]) {
+            const $modalTarget = $('#single-record-view-modal .modal-content');
+            $('#single-record-view-modal').modal();
+            $('.btn-view-record').each(function() {
+                $(this).on('click', () => {
+                    const l = Ladda.create( document.querySelector('a[data-target="' + $(this).attr('data-target') + '"]'));
+                    l.start();
+                    $.ajax({
+                            url: '{{ constant('ADMIN_URL') }}' + $(this).attr('data-target'),
+                            type: 'GET'
+                    }).done(function(data) {
+                        l.stop();
+                        $modalTarget.html(data);
+                            $('#single-record-view-modal').modal('open');
+                    }).fail(function(data, statut, error) {
+                            console.log(error);
+                    });
+                    return false;
+                });
+            });
+        }
+    }
+    loadjs.ready(['core', 'bundleG'], initBundleG);
+
+    </script>

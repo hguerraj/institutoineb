@@ -1,0 +1,40 @@
+<nav id="navbar-main" class="navbar navbar-expand-md shadow bg-{{ constant('NAVBAR_STYLE') }}">
+    <button class="sidebar-toggler btn btn-lg px-2 d-flex align-items-center shadow-none mx-2"><i class="navbar-toggler-icon"></i></button>
+
+    <ul class="navbar-nav mx-auto">
+        <li class="nav-item text-center">
+            <span class="navbar-text-active">{{ constant('SITENAME') }}<br><span class="navbar-text">{{ constant('ADMIN_DASHBOARD') }}</span></span>
+        </li>
+    </ul>
+
+    <ul class="navbar-nav flex-row">
+        {% if constant('ENABLE_STYLE_SWITCHING') == true %}
+        <li class="nav-item d-flex align-items-center" data-bs-toggle="tooltip" data-bs-title="{{ constant('CUSTOMIZE_THEME_AND_NAVBARS') }}">
+            <a class="nav-link" id="style-switcher-btn" data-bs-toggle="offcanvas" href="#style-switcher-wrapper" role="button" aria-controls="style-switcher-wrapper"><i class="{{ constant('ICON_STYLES') }} fa-xl"></i></a>
+        </li>
+        {% endif %}
+        <li class="nav-item d-flex align-items-center me-4">
+            <a class="nav-link" id="fullscreen-btn" data-bs-toggle="tooltip" data-bs-title="{{ constant('TOGGLE_FULL_SCREEN') }}" href="#"><i class="{{ constant('ICON_FULLSCREEN') }} fa-xl"></i></a>
+        </li>
+        <li class="nav-item py-2 me-4">
+            {% if constant('ADMIN_LOCKED') == true %}
+            <span class="navbar-text-active">{{ session.secure_user_firstname }} {{ session.secure_user_name }}</span>
+            <br>
+            <span class="navbar-text">{{ session.secure_user_profiles_name }}</span>
+            {% else %}
+            <span class="navbar-text-active">John Doe</span>
+            <br>
+            <span class="navbar-text">{{ constant('ADMIN') }}</span>
+            {% endif %}
+        </li>
+        <li class="nav-item d-flex align-items-center dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbar-user-dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="{{ constant('ICON_USER') }} me-4"></i>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbar-user-dropdown">
+                <li><a class="dropdown-item" href="{{ constant('ADMIN_URL') }}logout" rel="nofollow"><i class="{{ constant('ICON_LOGOUT') }} pull-right"></i> {{ constant('LOGOUT') }}</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>

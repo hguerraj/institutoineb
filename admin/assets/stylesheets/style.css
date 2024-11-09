@@ -1,0 +1,41 @@
+.bg-secondary-700{
+    background-color: #61fab1 !important;
+}
+
+.text-bg-secondary-800{
+    background-color: #000135 !important;
+}
+
+.text-secondary-400{
+    color: #000135 !important;
+}
+
+.icon-object{
+    border: 5px solid #000135;
+}
+
+.input-group-text{
+    background-color: #61fab1 !important;
+    color: #000135 !important;
+}
+
+.btn-outline-danger:hover{
+    background-color: #61fab1 !important;
+    border-color: #61fab1 !important;
+    color: #000135 !important;
+}
+
+.btn-outline-danger{
+    color: #61fab1 !important;
+    border-color: #61fab1 !important;
+    background-color: #000135 !important;
+    font-weight: bold;
+}
+
+.invalid-feedback{
+    color: #61fab1 !important;
+}
+
+.form-control.is-invalid, .was-validated .form-control:invalid{
+    border-color: #000135 !important;
+}

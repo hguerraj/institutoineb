@@ -1,0 +1,38 @@
+{
+    "CHAR": {
+        "type": "char"
+    },
+    "NCHAR": {
+        "type": "char"
+    },
+    "VARCHAR": {
+        "type": "varchar"
+    },
+    "VARCHAR2": {
+        "type": "varchar"
+    },
+    "NVARCHAR2": {
+        "type": "varchar"
+    },
+    "NUMBER": {
+        "type": "NUMBER"
+    },
+    "FLOAT": {
+        "type": "float"
+    },
+    "BINARY_FLOAT": {
+        "type": "float"
+    },
+    "BINARY_DOUBLE": {
+        "type": "double"
+    },
+    "DATE": {
+        "type": "date"
+    },
+    "TIMESTAMP": {
+        "type": "timestamp"
+    },
+    "LONG": {
+        "type": "text"
+    }
+}
